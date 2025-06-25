@@ -1,0 +1,50 @@
+{
+  "name": "Trello Time Tracker",
+  "version": "1.0.0",
+  "description": "A comprehensive time tracking Power-Up for Trello cards with timer functionality, manual time entry, and detailed reporting.",
+  "author": "Your Name",
+  "homepage_url": "https://your-domain.com",
+  "connector_url": "https://your-domain.com/index.html",
+  "icon": {
+    "url": "https://your-domain.com/icon.png"
+  },
+  "capabilities": [
+    "card-badges",
+    "card-buttons",
+    "board-buttons"
+  ],
+  "details": {
+    "overview": "Track time spent on Trello cards with an intuitive interface that supports both automatic timers and manual time entry.",
+    "features": [
+      "Start/stop timer functionality",
+      "Manual time entry with flexible formats (1h 30m, 90m, 2h)",
+      "Time tracking badges on cards",
+      "Detailed time history for each card",
+      "Board-wide time tracking reports",
+      "Export functionality for reports",
+      "Real-time timer updates",
+      "Persistent data storage"
+    ],
+    "screenshots": [
+      {
+        "url": "https://your-domain.com/screenshot-1.png",
+        "title": "Time Tracker Interface"
+      },
+      {
+        "url": "https://your-domain.com/screenshot-2.png",
+        "title": "Board Time Report"
+      }
+    ]
+  },
+  "permissions": [
+    "card:read",
+    "card:write",
+    "board:read"
+  ],
+  "tags": [
+    "productivity",
+    "time tracking",
+    "reporting",
+    "project management"
+  ]
+} 

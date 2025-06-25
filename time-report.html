@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Time Tracking Report</title>
+    <link rel="stylesheet" href="https://p.trellocdn.com/power-up.min.css">
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://p.trellocdn.com/power-up.min.js"></script>
+</head>
+<body>
+    <div class="time-report-container">
+        <!-- Report Header -->
+        <div class="report-header">
+            <h2>Time Tracking Report</h2>
+            <div class="report-summary">
+                <div class="summary-item">
+                    <span class="label">Total Board Time:</span>
+                    <span id="totalBoardTime" class="value">0h 0m</span>
+                </div>
+                <div class="summary-item">
+                    <span class="label">Cards with Time:</span>
+                    <span id="cardsWithTime" class="value">0</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filter Options -->
+        <div class="filter-section">
+            <div class="filter-group">
+                <label for="listFilter">Filter by List:</label>
+                <select id="listFilter" class="form-control">
+                    <option value="">All Lists</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="dateFilter">Filter by Date:</label>
+                <select id="dateFilter" class="form-control">
+                    <option value="">All Time</option>
+                    <option value="today">Today</option>
+                    <option value="yesterday">Yesterday</option>
+                    <option value="thisWeek">This Week</option>
+                    <option value="lastWeek">Last Week</option>
+                    <option value="thisMonth">This Month</option>
+                    <option value="lastMonth">Last Month</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Cards Time Report -->
+        <div class="cards-report">
+            <h3>Cards Time Breakdown</h3>
+            <div id="cardsReportList" class="report-list">
+                <!-- Cards will be populated here -->
+            </div>
+        </div>
+
+        <!-- Export Options -->
+        <div class="export-section">
+            <h3>Export Options</h3>
+            <div class="export-buttons">
+                <button id="exportCsvBtn" class="btn btn-secondary">Export to CSV</button>
+                <button id="exportJsonBtn" class="btn btn-secondary">Export to JSON</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /* global TrelloPowerUp */
+        
+        const t = TrelloPowerUp.iframe();
+        
+        async function init() {
+            try {
+                const boardData = await t.board('id', 'name', 'lists', 'cards');
+                let allTimeData = [];
+                
+                for (const card of boardData.cards) {
+                    try {
+                        const timeData = await t.get(card.id, 'shared', 'timeTracker', {});
+                        if (timeData.totalTime > 0 || timeData.isTracking) {
+                            allTimeData.push({ card, timeData });
+                        }
+                    } catch (error) {
+                        console.error(`Error loading time data for card ${card.id}:`, error);
+                    }
+                }
+                
+                renderReport(allTimeData, boardData);
+            } catch (error) {
+                console.error('Error initializing time report:', error);
+            }
+        }
+
+        function renderReport(data, boardData) {
+            const totalTime = data.reduce((sum, item) => sum + (item.timeData.totalTime || 0), 0);
+            
+            document.getElementById('totalBoardTime').textContent = formatTime(totalTime);
+            document.getElementById('cardsWithTime').textContent = data.length;
+            
+            const container = document.getElementById('cardsReportList');
+            
+            if (data.length === 0) {
+                container.innerHTML = '<div class="no-data">No time tracking data found</div>';
+                return;
+            }
+            
+            container.innerHTML = data.map(item => {
+                const listName = boardData.lists.find(l => l.id === item.card.idList)?.name || 'Unknown List';
+                return `
+                    <div class="card-report-item">
+                        <div class="card-info">
+                            <div class="card-name">${item.card.name}</div>
+                            <div class="card-list">${listName}</div>
+                        </div>
+                        <div class="time-info">
+                            <div class="total-time">${formatTime(item.timeData.totalTime || 0)}</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function formatTime(seconds) {
+            if (!seconds || seconds < 0) return '0h 0m';
+            
+            const hours = Math.floor(seconds / 3600);
+            const minutes = Math.floor((seconds % 3600) / 60);
+            
+            if (hours > 0) {
+                return `${hours}h ${minutes}m`;
+            }
+            return `${minutes}m`;
+        }
+
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html> 

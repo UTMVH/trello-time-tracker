@@ -1,0 +1,450 @@
+/* Trello Time Tracker Power-Up Styles */
+
+/* General Styles */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    margin: 0;
+    padding: 16px;
+    background: #fff;
+    color: #172b4d;
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+h2, h3 {
+    margin: 0 0 16px 0;
+    color: #172b4d;
+    font-weight: 600;
+}
+
+h2 {
+    font-size: 18px;
+}
+
+h3 {
+    font-size: 16px;
+}
+
+/* Container Styles */
+.time-tracker-container,
+.time-report-container {
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+/* Time Display */
+.time-display {
+    background: #f4f5f7;
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 16px;
+    text-align: center;
+}
+
+.total-time,
+.current-session {
+    margin-bottom: 8px;
+}
+
+.current-session:last-child {
+    margin-bottom: 0;
+}
+
+.label {
+    display: inline-block;
+    font-weight: 500;
+    color: #6b778c;
+    margin-right: 8px;
+}
+
+.time-value {
+    font-weight: 600;
+    font-size: 16px;
+    color: #172b4d;
+}
+
+/* Button Styles */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.15s ease;
+    min-height: 36px;
+    gap: 6px;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.btn:active {
+    transform: translateY(0);
+}
+
+.btn-primary {
+    background: #0079bf;
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #005a8b;
+}
+
+.btn-danger {
+    background: #b04632;
+    color: white;
+}
+
+.btn-danger:hover {
+    background: #933b2c;
+}
+
+.btn-secondary {
+    background: #ddd;
+    color: #172b4d;
+}
+
+.btn-secondary:hover {
+    background: #ccc;
+}
+
+.btn-link {
+    background: transparent;
+    color: #0079bf;
+    text-decoration: underline;
+    padding: 4px 8px;
+}
+
+.btn-link:hover {
+    color: #005a8b;
+    transform: none;
+    box-shadow: none;
+}
+
+.icon {
+    font-size: 12px;
+}
+
+/* Timer Controls */
+.timer-controls {
+    text-align: center;
+    margin-bottom: 24px;
+}
+
+/* Manual Time Section */
+.manual-time-section {
+    margin-bottom: 24px;
+}
+
+.input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.form-control {
+    padding: 8px 12px;
+    border: 2px solid #ddd;
+    border-radius: 6px;
+    font-size: 14px;
+    transition: border-color 0.15s ease;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: #0079bf;
+}
+
+.time-format-help {
+    color: #6b778c;
+    font-size: 12px;
+    margin-top: 4px;
+}
+
+/* Time History */
+.time-history {
+    margin-bottom: 24px;
+}
+
+.entries-list {
+    max-height: 200px;
+    overflow-y: auto;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    background: #f8f9fa;
+}
+
+.entry-item {
+    display: flex;
+    align-items: center;
+    padding: 8px 12px;
+    border-bottom: 1px solid #e4e6ea;
+    font-size: 13px;
+    gap: 8px;
+}
+
+.entry-item:last-child {
+    border-bottom: none;
+}
+
+.entry-icon {
+    font-size: 14px;
+    width: 20px;
+    text-align: center;
+}
+
+.entry-time {
+    font-weight: 600;
+    color: #0079bf;
+    min-width: 50px;
+}
+
+.entry-date {
+    color: #6b778c;
+    font-size: 11px;
+    flex: 1;
+}
+
+.entry-description {
+    color: #172b4d;
+    font-style: italic;
+}
+
+.no-entries {
+    padding: 16px;
+    text-align: center;
+    color: #6b778c;
+    font-style: italic;
+}
+
+/* Action Buttons */
+.action-buttons {
+    text-align: center;
+    padding-top: 16px;
+    border-top: 1px solid #e4e6ea;
+}
+
+/* Report Styles */
+.report-header {
+    margin-bottom: 24px;
+}
+
+.report-summary {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-top: 16px;
+}
+
+.summary-item {
+    background: #f4f5f7;
+    padding: 12px;
+    border-radius: 6px;
+    text-align: center;
+}
+
+.summary-item .label {
+    display: block;
+    font-size: 12px;
+    color: #6b778c;
+    margin-bottom: 4px;
+}
+
+.summary-item .value {
+    display: block;
+    font-size: 18px;
+    font-weight: 600;
+    color: #172b4d;
+}
+
+/* Filter Section */
+.filter-section {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 24px;
+    padding: 16px;
+    background: #f8f9fa;
+    border-radius: 6px;
+}
+
+.filter-group label {
+    display: block;
+    margin-bottom: 4px;
+    color: #6b778c;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+/* Cards Report */
+.cards-report {
+    margin-bottom: 24px;
+}
+
+.report-list {
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    background: white;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.card-report-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    border-bottom: 1px solid #e4e6ea;
+    transition: background-color 0.15s ease;
+}
+
+.card-report-item:last-child {
+    border-bottom: none;
+}
+
+.card-report-item:hover {
+    background: #f8f9fa;
+}
+
+.card-report-item.tracking {
+    background: #e3fcef;
+    border-left: 4px solid #00c851;
+}
+
+.card-info {
+    flex: 1;
+}
+
+.card-name {
+    font-weight: 500;
+    color: #172b4d;
+    margin-bottom: 4px;
+}
+
+.card-list {
+    font-size: 12px;
+    color: #6b778c;
+}
+
+.time-info {
+    text-align: right;
+}
+
+.total-time {
+    font-weight: 600;
+    color: #0079bf;
+    font-size: 16px;
+}
+
+.entries-count {
+    font-size: 11px;
+    color: #6b778c;
+    margin-top: 2px;
+}
+
+.tracking-indicator {
+    font-size: 11px;
+    color: #00c851;
+    font-weight: 500;
+    margin-top: 2px;
+}
+
+.no-data {
+    padding: 32px;
+    text-align: center;
+    color: #6b778c;
+    font-style: italic;
+}
+
+/* Export Section */
+.export-section {
+    padding-top: 16px;
+    border-top: 1px solid #e4e6ea;
+}
+
+.export-buttons {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+}
+
+/* Responsive Design */
+@media (max-width: 480px) {
+    .report-summary {
+        grid-template-columns: 1fr;
+    }
+    
+    .filter-section {
+        grid-template-columns: 1fr;
+    }
+    
+    .export-buttons {
+        flex-direction: column;
+    }
+    
+    .card-report-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+    
+    .time-info {
+        text-align: left;
+        width: 100%;
+    }
+}
+
+/* Loading States */
+.loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 32px;
+    color: #6b778c;
+}
+
+.loading::after {
+    content: '';
+    width: 16px;
+    height: 16px;
+    margin-left: 8px;
+    border: 2px solid #ddd;
+    border-top: 2px solid #0079bf;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Badge Styles (for card badges) */
+.time-badge {
+    background: #0079bf;
+    color: white;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 11px;
+    font-weight: 500;
+}
+
+.time-badge.tracking {
+    background: #00c851;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.7; }
+    100% { opacity: 1; }
+} 

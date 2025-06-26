@@ -160,21 +160,37 @@ window.TrelloPowerUp.initialize({
         }];
     },
 
-    // Add board button for reports
+    // Add board buttons for reports and timer management
     'board-buttons': function(t, options) {
-        return [{
-            icon: {
-                dark: WHITE_ICON,
-                light: BLACK_ICON
+        return [
+            {
+                icon: {
+                    dark: WHITE_ICON,
+                    light: BLACK_ICON
+                },
+                text: 'Time Report',
+                callback: function(t) {
+                    return t.popup({
+                        title: 'Time Tracking Report',
+                        url: 'time-report.html',
+                        height: 500
+                    });
+                }
             },
-            text: 'Time Report',
-            callback: function(t) {
-                return t.popup({
-                    title: 'Time Tracking Report',
-                    url: 'time-report.html',
-                    height: 500
-                });
+            {
+                icon: {
+                    dark: WHITE_ICON,
+                    light: BLACK_ICON
+                },
+                text: 'Active Timers',
+                callback: function(t) {
+                    return t.popup({
+                        title: 'Active Timers Dashboard',
+                        url: 'active-timers.html',
+                        height: 400
+                    });
+                }
             }
-        }];
+        ];
     }
 }); 

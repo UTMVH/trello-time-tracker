@@ -71,13 +71,19 @@
         
         async function init() {
             try {
+                console.log('Initializing time report...');
                 const boardData = await t.board('id', 'name', 'lists', 'cards');
+                console.log('Board data loaded:', boardData);
+                
                 let allTimeData = [];
                 
                 for (const card of boardData.cards) {
                     try {
                         const timeData = await t.get(card.id, 'shared', 'timeTracker', {});
-                        if (timeData.totalTime > 0 || timeData.isTracking) {
+                        console.log(`Card ${card.name} time data:`, timeData);
+                        
+                        // Check if card has any time tracking data
+                        if (timeData && (timeData.totalTime > 0 || timeData.isTracking || (timeData.entries && timeData.entries.length > 0))) {
                             allTimeData.push({ card, timeData });
                         }
                     } catch (error) {
@@ -85,14 +91,31 @@
                     }
                 }
                 
+                console.log('All time data loaded:', allTimeData);
                 renderReport(allTimeData, boardData);
             } catch (error) {
                 console.error('Error initializing time report:', error);
+                showError('Failed to load time report data');
             }
         }
 
         function renderReport(data, boardData) {
-            const totalTime = data.reduce((sum, item) => sum + (item.timeData.totalTime || 0), 0);
+            console.log('Rendering report with data:', data);
+            
+            // Calculate total time including active sessions
+            const totalTime = data.reduce((sum, item) => {
+                let itemTime = item.timeData.totalTime || 0;
+                
+                // Add current session time if tracking
+                if (item.timeData.isTracking && item.timeData.startTime) {
+                    const currentSession = Math.round((Date.now() - item.timeData.startTime) / 1000);
+                    itemTime += currentSession;
+                }
+                
+                return sum + itemTime;
+            }, 0);
+            
+            console.log('Total time calculated:', totalTime);
             
             document.getElementById('totalBoardTime').textContent = formatTime(totalTime);
             document.getElementById('cardsWithTime').textContent = data.length;
@@ -100,24 +123,56 @@
             const container = document.getElementById('cardsReportList');
             
             if (data.length === 0) {
-                container.innerHTML = '<div class="no-data">No time tracking data found</div>';
+                container.innerHTML = '<div class="no-data">No time tracking data found. Try tracking some time on cards first!</div>';
                 return;
             }
             
+            // Sort by total time descending
+            data.sort((a, b) => {
+                let timeA = a.timeData.totalTime || 0;
+                let timeB = b.timeData.totalTime || 0;
+                
+                if (a.timeData.isTracking && a.timeData.startTime) {
+                    timeA += Math.round((Date.now() - a.timeData.startTime) / 1000);
+                }
+                if (b.timeData.isTracking && b.timeData.startTime) {
+                    timeB += Math.round((Date.now() - b.timeData.startTime) / 1000);
+                }
+                
+                return timeB - timeA;
+            });
+            
             container.innerHTML = data.map(item => {
+                let displayTime = item.timeData.totalTime || 0;
+                let isTracking = item.timeData.isTracking;
+                
+                if (isTracking && item.timeData.startTime) {
+                    const currentSession = Math.round((Date.now() - item.timeData.startTime) / 1000);
+                    displayTime += currentSession;
+                }
+                
                 const listName = boardData.lists.find(l => l.id === item.card.idList)?.name || 'Unknown List';
+                const entriesCount = item.timeData.entries ? item.timeData.entries.length : 0;
+                
                 return `
-                    <div class="card-report-item">
+                    <div class="card-report-item ${isTracking ? 'tracking' : ''}">
                         <div class="card-info">
                             <div class="card-name">${item.card.name}</div>
                             <div class="card-list">${listName}</div>
                         </div>
                         <div class="time-info">
-                            <div class="total-time">${formatTime(item.timeData.totalTime || 0)}</div>
+                            <div class="total-time">${formatTime(displayTime)}</div>
+                            <div class="entries-count">${entriesCount} entries</div>
+                            ${isTracking ? '<div class="tracking-indicator">⏲️ Currently tracking</div>' : ''}
                         </div>
                     </div>
                 `;
             }).join('');
+        }
+        
+        function showError(message) {
+            const container = document.getElementById('cardsReportList');
+            container.innerHTML = `<div class="error-message">❌ ${message}</div>`;
         }
 
         function formatTime(seconds) {

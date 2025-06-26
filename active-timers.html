@@ -50,7 +50,31 @@
 
         async function init() {
             try {
-                boardData = await t.board('id', 'name', 'lists', 'cards');
+                console.log('Initializing active timers dashboard...');
+                
+                // Use getContext to get board information
+                const context = t.getContext();
+                console.log('Context:', context);
+                
+                // Get basic board info 
+                const boardInfo = await t.board('id', 'name');
+                console.log('Board info:', boardInfo);
+                
+                // Get all lists on the board
+                const boardLists = await t.lists('id', 'name');
+                console.log('Lists:', boardLists);
+                
+                // Get all cards on the board  
+                const boardCards = await t.cards('id', 'name', 'idList');
+                console.log('Cards:', boardCards);
+                
+                boardData = {
+                    id: boardInfo.id,
+                    name: boardInfo.name,
+                    lists: boardLists,
+                    cards: boardCards
+                };
+                
                 await loadActiveTimers();
                 setupEventListeners();
                 
@@ -59,7 +83,8 @@
                 
             } catch (error) {
                 console.error('Error initializing active timers dashboard:', error);
-                showError('Failed to load active timers');
+                console.error('Error details:', error);
+                showError('Failed to load active timers. Check console for details.');
             }
         }
 

@@ -72,18 +72,44 @@
         async function init() {
             try {
                 console.log('Initializing time report...');
-                const boardData = await t.board('id', 'name', 'lists', 'cards');
-                console.log('Board data loaded:', boardData);
+                
+                // Use getContext to get board information
+                const context = t.getContext();
+                console.log('Context:', context);
+                
+                // Get basic board info 
+                const boardInfo = await t.board('id', 'name');
+                console.log('Board info:', boardInfo);
+                
+                // Get all lists on the board
+                const boardLists = await t.lists('id', 'name');
+                console.log('Lists:', boardLists);
+                
+                // Get all cards on the board  
+                const boardCards = await t.cards('id', 'name', 'idList');
+                console.log('Cards:', boardCards);
+                
+                const boardData = {
+                    id: boardInfo.id,
+                    name: boardInfo.name,
+                    lists: boardLists,
+                    cards: boardCards
+                };
                 
                 let allTimeData = [];
                 
+                // Load time data for each card
                 for (const card of boardData.cards) {
                     try {
                         const timeData = await t.get(card.id, 'shared', 'timeTracker', {});
-                        console.log(`Card ${card.name} time data:`, timeData);
+                        console.log(`Card "${card.name}" time data:`, timeData);
                         
                         // Check if card has any time tracking data
-                        if (timeData && (timeData.totalTime > 0 || timeData.isTracking || (timeData.entries && timeData.entries.length > 0))) {
+                        if (timeData && (
+                            (timeData.totalTime && timeData.totalTime > 0) || 
+                            timeData.isTracking || 
+                            (timeData.entries && timeData.entries.length > 0)
+                        )) {
                             allTimeData.push({ card, timeData });
                         }
                     } catch (error) {
@@ -93,9 +119,11 @@
                 
                 console.log('All time data loaded:', allTimeData);
                 renderReport(allTimeData, boardData);
+                
             } catch (error) {
                 console.error('Error initializing time report:', error);
-                showError('Failed to load time report data');
+                console.error('Error details:', error);
+                showError('Failed to load time report data. Check console for details.');
             }
         }
 

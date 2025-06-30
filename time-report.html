@@ -125,7 +125,7 @@
                 
                 // Setup filters and render report
                 setupFilters(boardData);
-                renderReport(allTimeData, boardData);
+                renderReport(allTimeData, boardData, null);
                 
             } catch (error) {
                 console.error('Error initializing time report:', error);
@@ -170,7 +170,7 @@
             }
             
             console.log('Filtered data:', filteredData);
-            renderReport(filteredData, window.boardData);
+            renderReport(filteredData, window.boardData, dateFilterValue);
         }
 
         function applyDateFilter(data, dateFilter) {
@@ -230,19 +230,132 @@
             });
         }
 
-        function renderReport(data, boardData) {
-            console.log('Rendering report with data:', data);
+        function calculateFilteredTime(timeData, dateFilter) {
+            if (!dateFilter) {
+                // No date filter - return total time
+                let totalTime = timeData.totalTime || 0;
+                if (timeData.isTracking && timeData.startTime) {
+                    totalTime += Math.round((Date.now() - timeData.startTime) / 1000);
+                }
+                return totalTime;
+            }
             
-            // Calculate total time including active sessions
-            const totalTime = data.reduce((sum, item) => {
-                let itemTime = item.timeData.totalTime || 0;
+            // Calculate time only from entries matching the date filter
+            const now = new Date();
+            const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            const entries = timeData.entries || [];
+            
+            let filteredTime = 0;
+            
+            entries.forEach(entry => {
+                const entryDate = new Date(entry.date);
+                const entryDay = new Date(entryDate.getFullYear(), entryDate.getMonth(), entryDate.getDate());
+                let includeEntry = false;
                 
-                // Add current session time if tracking
-                if (item.timeData.isTracking && item.timeData.startTime) {
-                    const currentSession = Math.round((Date.now() - item.timeData.startTime) / 1000);
-                    itemTime += currentSession;
+                switch (dateFilter) {
+                    case 'today':
+                        includeEntry = entryDay.getTime() === today.getTime();
+                        break;
+                    
+                    case 'yesterday':
+                        const yesterday = new Date(today);
+                        yesterday.setDate(yesterday.getDate() - 1);
+                        includeEntry = entryDay.getTime() === yesterday.getTime();
+                        break;
+                    
+                    case 'thisWeek':
+                        const startOfWeek = new Date(today);
+                        startOfWeek.setDate(today.getDate() - today.getDay());
+                        includeEntry = entryDate >= startOfWeek;
+                        break;
+                    
+                    case 'lastWeek':
+                        const startOfLastWeek = new Date(today);
+                        startOfLastWeek.setDate(today.getDate() - today.getDay() - 7);
+                        const endOfLastWeek = new Date(today);
+                        endOfLastWeek.setDate(today.getDate() - today.getDay() - 1);
+                        endOfLastWeek.setHours(23, 59, 59, 999);
+                        includeEntry = entryDate >= startOfLastWeek && entryDate <= endOfLastWeek;
+                        break;
+                    
+                    case 'thisMonth':
+                        const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+                        includeEntry = entryDate >= startOfMonth;
+                        break;
+                    
+                    case 'lastMonth':
+                        const startOfLastMonth = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+                        const endOfLastMonth = new Date(today.getFullYear(), today.getMonth(), 0);
+                        endOfLastMonth.setHours(23, 59, 59, 999);
+                        includeEntry = entryDate >= startOfLastMonth && entryDate <= endOfLastMonth;
+                        break;
+                    
+                    default:
+                        includeEntry = true;
                 }
                 
+                if (includeEntry) {
+                    filteredTime += entry.duration || 0;
+                }
+            });
+            
+            // Add current session time if tracking and it matches the filter
+            if (timeData.isTracking && timeData.startTime) {
+                const sessionStartDate = new Date(timeData.startTime);
+                const sessionStartDay = new Date(sessionStartDate.getFullYear(), sessionStartDate.getMonth(), sessionStartDate.getDate());
+                let includeCurrentSession = false;
+                
+                switch (dateFilter) {
+                    case 'today':
+                        includeCurrentSession = sessionStartDay.getTime() === today.getTime();
+                        break;
+                    case 'yesterday':
+                        const yesterday = new Date(today);
+                        yesterday.setDate(yesterday.getDate() - 1);
+                        includeCurrentSession = sessionStartDay.getTime() === yesterday.getTime();
+                        break;
+                    case 'thisWeek':
+                        const startOfWeek = new Date(today);
+                        startOfWeek.setDate(today.getDate() - today.getDay());
+                        includeCurrentSession = sessionStartDate >= startOfWeek;
+                        break;
+                    case 'lastWeek':
+                        const startOfLastWeek = new Date(today);
+                        startOfLastWeek.setDate(today.getDate() - today.getDay() - 7);
+                        const endOfLastWeek = new Date(today);
+                        endOfLastWeek.setDate(today.getDate() - today.getDay() - 1);
+                        endOfLastWeek.setHours(23, 59, 59, 999);
+                        includeCurrentSession = sessionStartDate >= startOfLastWeek && sessionStartDate <= endOfLastWeek;
+                        break;
+                    case 'thisMonth':
+                        const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+                        includeCurrentSession = sessionStartDate >= startOfMonth;
+                        break;
+                    case 'lastMonth':
+                        const startOfLastMonth = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+                        const endOfLastMonth = new Date(today.getFullYear(), today.getMonth(), 0);
+                        endOfLastMonth.setHours(23, 59, 59, 999);
+                        includeCurrentSession = sessionStartDate >= startOfLastMonth && sessionStartDate <= endOfLastMonth;
+                        break;
+                    default:
+                        includeCurrentSession = true;
+                }
+                
+                if (includeCurrentSession) {
+                    const currentSession = Math.round((Date.now() - timeData.startTime) / 1000);
+                    filteredTime += currentSession;
+                }
+            }
+            
+            return filteredTime;
+        }
+
+        function renderReport(data, boardData, dateFilter = null) {
+            console.log('Rendering report with data:', data, 'dateFilter:', dateFilter);
+            
+            // Calculate total time using filtered time calculation
+            const totalTime = data.reduce((sum, item) => {
+                const itemTime = calculateFilteredTime(item.timeData, dateFilter);
                 return sum + itemTime;
             }, 0);
             
@@ -258,32 +371,62 @@
                 return;
             }
             
-            // Sort by total time descending
+            // Sort by filtered time descending
             data.sort((a, b) => {
-                let timeA = a.timeData.totalTime || 0;
-                let timeB = b.timeData.totalTime || 0;
-                
-                if (a.timeData.isTracking && a.timeData.startTime) {
-                    timeA += Math.round((Date.now() - a.timeData.startTime) / 1000);
-                }
-                if (b.timeData.isTracking && b.timeData.startTime) {
-                    timeB += Math.round((Date.now() - b.timeData.startTime) / 1000);
-                }
-                
+                const timeA = calculateFilteredTime(a.timeData, dateFilter);
+                const timeB = calculateFilteredTime(b.timeData, dateFilter);
                 return timeB - timeA;
             });
             
             container.innerHTML = data.map(item => {
-                let displayTime = item.timeData.totalTime || 0;
-                let isTracking = item.timeData.isTracking;
+                const displayTime = calculateFilteredTime(item.timeData, dateFilter);
+                const isTracking = item.timeData.isTracking;
                 
-                if (isTracking && item.timeData.startTime) {
-                    const currentSession = Math.round((Date.now() - item.timeData.startTime) / 1000);
-                    displayTime += currentSession;
+                // Count entries that match the filter (for display)
+                let filteredEntriesCount = 0;
+                if (dateFilter && item.timeData.entries) {
+                    const now = new Date();
+                    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+                    
+                    filteredEntriesCount = item.timeData.entries.filter(entry => {
+                        const entryDate = new Date(entry.date);
+                        const entryDay = new Date(entryDate.getFullYear(), entryDate.getMonth(), entryDate.getDate());
+                        
+                        switch (dateFilter) {
+                            case 'today':
+                                return entryDay.getTime() === today.getTime();
+                            case 'yesterday':
+                                const yesterday = new Date(today);
+                                yesterday.setDate(yesterday.getDate() - 1);
+                                return entryDay.getTime() === yesterday.getTime();
+                            case 'thisWeek':
+                                const startOfWeek = new Date(today);
+                                startOfWeek.setDate(today.getDate() - today.getDay());
+                                return entryDate >= startOfWeek;
+                            case 'lastWeek':
+                                const startOfLastWeek = new Date(today);
+                                startOfLastWeek.setDate(today.getDate() - today.getDay() - 7);
+                                const endOfLastWeek = new Date(today);
+                                endOfLastWeek.setDate(today.getDate() - today.getDay() - 1);
+                                endOfLastWeek.setHours(23, 59, 59, 999);
+                                return entryDate >= startOfLastWeek && entryDate <= endOfLastWeek;
+                            case 'thisMonth':
+                                const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+                                return entryDate >= startOfMonth;
+                            case 'lastMonth':
+                                const startOfLastMonth = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+                                const endOfLastMonth = new Date(today.getFullYear(), today.getMonth(), 0);
+                                endOfLastMonth.setHours(23, 59, 59, 999);
+                                return entryDate >= startOfLastMonth && entryDate <= endOfLastMonth;
+                            default:
+                                return true;
+                        }
+                    }).length;
+                } else {
+                    filteredEntriesCount = item.timeData.entries ? item.timeData.entries.length : 0;
                 }
                 
                 const listName = boardData.lists.find(l => l.id === item.card.idList)?.name || 'Unknown List';
-                const entriesCount = item.timeData.entries ? item.timeData.entries.length : 0;
                 
                 return `
                     <div class="card-report-item ${isTracking ? 'tracking' : ''}">
@@ -293,7 +436,7 @@
                         </div>
                         <div class="time-info">
                             <div class="total-time">${formatTime(displayTime)}</div>
-                            <div class="entries-count">${entriesCount} entries</div>
+                            <div class="entries-count">${filteredEntriesCount} entries${dateFilter ? ' (filtered)' : ''}</div>
                             ${isTracking ? '<div class="tracking-indicator">⏲️ Currently tracking</div>' : ''}
                         </div>
                     </div>

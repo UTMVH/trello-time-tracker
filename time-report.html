@@ -187,7 +187,7 @@
                 }
                 
                 // Check if any entries match the date filter
-                return entries.some(entry => {
+                const hasMatchingEntry = entries.some(entry => {
                     const entryDate = new Date(entry.date);
                     const entryDay = new Date(entryDate.getFullYear(), entryDate.getMonth(), entryDate.getDate());
                     
@@ -227,6 +227,8 @@
                             return true;
                     }
                 });
+                
+                return hasMatchingEntry;
             });
         }
 

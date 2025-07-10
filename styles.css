@@ -219,6 +219,26 @@ h3 {
     font-style: italic;
 }
 
+.btn-delete-entry {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    margin-left: auto;
+    opacity: 0.6;
+    transition: opacity 0.15s ease;
+}
+
+.btn-delete-entry:hover {
+    opacity: 1;
+    background: rgba(255, 0, 0, 0.1);
+}
+
+.delete-icon {
+    font-size: 12px;
+}
+
 .no-entries {
     padding: 16px;
     text-align: center;

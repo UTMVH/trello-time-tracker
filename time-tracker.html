@@ -144,11 +144,12 @@
             // Show last 5 entries
             const recentEntries = entries.slice(-5).reverse();
             
-            entriesContainer.innerHTML = recentEntries.map(entry => {
+            entriesContainer.innerHTML = recentEntries.map((entry, index) => {
                 const date = new Date(entry.date);
                 const timeStr = formatTime(entry.duration);
                 const typeIcon = entry.type === 'timer' ? '⏲️' : '✏️';
                 const description = entry.description ? ` - ${entry.description}` : '';
+                const originalIndex = entries.length - 1 - index; // Calculate original index in the array
                 
                 return `
                     <div class="entry-item">
@@ -156,6 +157,9 @@
                         <span class="entry-time">${timeStr}</span>
                         <span class="entry-date">${date.toLocaleDateString()} ${date.toLocaleTimeString()}</span>
                         ${description ? `<span class="entry-description">${description}</span>` : ''}
+                        <button class="btn-delete-entry" onclick="deleteEntry(${originalIndex})" title="Delete this entry">
+                            <span class="delete-icon">🗑️</span>
+                        </button>
                     </div>
                 `;
             }).join('');
@@ -227,6 +231,42 @@
             } catch (error) {
                 console.error('Error clearing time data:', error);
                 alert('Failed to clear time data');
+            }
+        }
+
+        async function deleteEntry(entryIndex) {
+            try {
+                const timeData = await getTimeData(t, currentCardId);
+                
+                if (entryIndex < 0 || entryIndex >= timeData.entries.length) {
+                    console.error('Invalid entry index:', entryIndex);
+                    return;
+                }
+                
+                const entryToDelete = timeData.entries[entryIndex];
+                const timeStr = formatTime(entryToDelete.duration);
+                const date = new Date(entryToDelete.date);
+                const dateStr = `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
+                
+                if (!confirm(`Are you sure you want to delete this entry?\n\nTime: ${timeStr}\nDate: ${dateStr}\n\nThis will also subtract ${timeStr} from your total time.`)) {
+                    return;
+                }
+                
+                // Remove the entry and subtract its time from total
+                timeData.totalTime -= entryToDelete.duration;
+                timeData.entries.splice(entryIndex, 1);
+                
+                // Ensure total time doesn't go negative
+                if (timeData.totalTime < 0) {
+                    timeData.totalTime = 0;
+                }
+                
+                await t.set(currentCardId, 'shared', 'timeTracker', timeData);
+                await updateDisplay();
+                
+            } catch (error) {
+                console.error('Error deleting entry:', error);
+                alert('Failed to delete entry');
             }
         }
 
